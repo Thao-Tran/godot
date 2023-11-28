@@ -483,7 +483,7 @@ OS::MouseMode OS_JavaScript::get_mouse_mode() const {
 
 // Wheel
 
-int OS_JavaScript::mouse_wheel_callback(double p_delta_x, double p_delta_y) {
+int OS_JavaScript::mouse_wheel_callback(double p_delta_x, double p_delta_y, int p_modifiers) {
 	OS_JavaScript *os = get_singleton();
 
 	if (!godot_js_display_canvas_is_focused()) {
@@ -499,20 +499,24 @@ int OS_JavaScript::mouse_wheel_callback(double p_delta_x, double p_delta_y) {
 	ev.instance();
 	ev->set_position(input->get_mouse_position());
 	ev->set_global_position(ev->get_position());
+	dom2godot_mod(ev, p_modifiers);
 
-	ev->set_shift(input->is_key_pressed(KEY_SHIFT));
-	ev->set_alt(input->is_key_pressed(KEY_ALT));
-	ev->set_control(input->is_key_pressed(KEY_CONTROL));
-	ev->set_metakey(input->is_key_pressed(KEY_META));
+	if (p_delta_y != 0) {
+		ev->set_factor(p_delta_y);
 
-	if (p_delta_y < 0) {
-		ev->set_button_index(BUTTON_WHEEL_UP);
-	} else if (p_delta_y > 0) {
-		ev->set_button_index(BUTTON_WHEEL_DOWN);
-	} else if (p_delta_x > 0) {
-		ev->set_button_index(BUTTON_WHEEL_LEFT);
-	} else if (p_delta_x < 0) {
-		ev->set_button_index(BUTTON_WHEEL_RIGHT);
+		if (p_delta_y < 0) {
+			ev->set_button_index(BUTTON_WHEEL_UP);
+		} else if (p_delta_y > 0) {
+			ev->set_button_index(BUTTON_WHEEL_DOWN);
+		}
+	} else if (p_delta_x != 0) {
+		ev->set_factor(p_delta_x);
+
+		if (p_delta_x > 0) {
+			ev->set_button_index(BUTTON_WHEEL_LEFT);
+		} else if (p_delta_x < 0) {
+			ev->set_button_index(BUTTON_WHEEL_RIGHT);
+		}
 	} else {
 		return false;
 	}

@@ -378,7 +378,12 @@ const GodotInput = {
 	godot_js_input_mouse_wheel_cb: function (callback) {
 		const func = GodotRuntime.get_func(callback);
 		function wheel_cb(evt) {
-			if (func(evt['deltaX'] || 0, evt['deltaY'] || 0)) {
+			const modifiers = GodotInput.getModifiers(evt);
+			// Since the event is consumed, focus manually.
+			// NOTE: The iframe container may not have focus yet, so focus even when already active.
+			GodotConfig.canvas.focus();
+
+			if (func(evt['deltaX'] || 0, evt['deltaY'] || 0, modifiers)) {
 				evt.preventDefault();
 			}
 		}
