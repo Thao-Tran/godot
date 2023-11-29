@@ -495,6 +495,17 @@ int OS_JavaScript::mouse_wheel_callback(double p_delta_x, double p_delta_y, int 
 	}
 
 	InputDefault *input = os->input;
+
+	if (p_delta_y != 0 && p_delta_x != 0) {
+		Ref<InputEventPanGesture> ev;
+		ev.instance();
+		ev->set_position(input->get_mouse_position());
+		ev->set_delta(Vector2(p_delta_x, p_delta_y));
+		dom2godot_mod(ev, p_modifiers);
+		input->parse_input_event(ev);
+		return true;
+	}
+
 	Ref<InputEventMouseButton> ev;
 	ev.instance();
 	ev->set_position(input->get_mouse_position());
